@@ -150,15 +150,49 @@ export default function Home() {
           },
         });
 
+        // map.current.on('click', 'city-symbols', (e) => {
+        //   if (!e.features || e.features.length === 0 || !map.current) return;
+
+        //   // Type assertion to ensure TypeScript knows we're dealing with a Point geometry
+        //   const geometry = e.features[0].geometry as { type: 'Point'; coordinates: number[] };
+        //   const coordinates = geometry.coordinates.slice();
+        //   const description = e.features[0].properties.description;
+
+        //   // Add null check and type assertion for description
+        //   if (description === null || description === undefined) return;
+
+        //   // Ensure description is a valid key for cityData
+        //   const cityName = String(description);
+        //   const cityInfo = cityData[cityName as keyof typeof cityData];
+        //   if (!cityInfo) return;
+
+        //   // Create popup content
+        //   const popupContent = `
+        //     <div class="popup-content">
+        //       <img class="popup-image" src="${cityInfo.image}" alt="${description}" />
+        //       <a class="popup-link" href="${cityInfo.link}">
+        //         ${description}
+        //       </a>
+        //     </div>
+        //   `;
+
+        //   new mapboxgl.Popup({
+        //     closeButton: true,
+        //     closeOnClick: true,
+        //   })
+        //     .setLngLat(coordinates as [number, number])
+        //     .setHTML(popupContent)
+        //     .addTo(map.current);
+        // });
         map.current.on('click', 'city-symbols', (e) => {
           if (!e.features || e.features.length === 0 || !map.current) return;
 
-          // Type assertion to ensure TypeScript knows we're dealing with a Point geometry
-          const geometry = e.features[0].geometry as { type: 'Point'; coordinates: number[] };
-          const coordinates = geometry.coordinates.slice();
-          const description = e.features[0].properties.description;
+          // プロパティが存在するか確認
+          const properties = e.features[0].properties;
+          if (!properties) return;
+          const description = properties.description;
 
-          // Add null check and type assertion for description
+          // nullまたはundefinedの場合は何もしない
           if (description === null || description === undefined) return;
 
           // Ensure description is a valid key for cityData
@@ -180,7 +214,12 @@ export default function Home() {
             closeButton: true,
             closeOnClick: true,
           })
-            .setLngLat(coordinates as [number, number])
+            .setLngLat(
+              (e.features[0].geometry as { type: 'Point'; coordinates: number[] }).coordinates.slice() as [
+                number,
+                number,
+              ],
+            )
             .setHTML(popupContent)
             .addTo(map.current);
         });
